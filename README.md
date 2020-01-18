@@ -3,7 +3,7 @@
 [![Discord Server](https://img.shields.io/discord/594411513457147904.svg?color=blueviolet)](https://discord.io/origami)
 [![](https://img.shields.io/badge/api-fabric-orange.svg)](https://www.curseforge.com/minecraft/mc-mods/fabric-api/files)
 
-SheetLib is library for some commonly used stuff 
+A library for some commonly used stuff in Origami
 
 https://origami-games.github.io/sheet-lib
 
