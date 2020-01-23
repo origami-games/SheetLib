@@ -100,6 +100,6 @@ public class SheetLib implements ModInitializer {
 
     // item group template
     public static ItemGroup itemGroup(String mod_id, String id, ItemStack item_stack) {
-        return FabricItemGroupBuilder.build(new Identifier(mod_id, "item_group"), () -> item_stack);
+        return FabricItemGroupBuilder.build(new Identifier(mod_id, id), () -> item_stack);
     }
 }
