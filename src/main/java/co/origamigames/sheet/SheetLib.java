@@ -17,6 +17,13 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.GenerationStep;
+import net.minecraft.world.gen.decorator.CountDecoratorConfig;
+import net.minecraft.world.gen.decorator.Decorator;
+import net.minecraft.world.gen.decorator.RangeDecoratorConfig;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.OreFeatureConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -101,5 +108,31 @@ public class SheetLib implements ModInitializer {
     // item group template
     public static ItemGroup itemGroup(String mod_id, String id, ItemStack item_stack) {
         return FabricItemGroupBuilder.build(new Identifier(mod_id, id), () -> item_stack);
+    }
+
+    // world gen
+        // default overworld ore addition
+    public static void addOverworldOre(Block block, int size, int count, int bottomOffset, int topOffset, int maxPerChunk) {
+        for (Biome biome : Registry.BIOME) {
+            // add ore
+            if (biome.getCategory() != Biome.Category.NETHER && biome.getCategory() != Biome.Category.THEEND) {
+                biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
+                        Feature.ORE
+                                .configure(new OreFeatureConfig(OreFeatureConfig.Target.NATURAL_STONE, block.getDefaultState(), size))
+                                .createDecoratedFeature(Decorator.COUNT_RANGE
+                                        .configure(new RangeDecoratorConfig(count, bottomOffset, topOffset, maxPerChunk))));
+            }
+        }
+    }
+        // magma-like spawning conditions
+    public static void addToMagmaDecorator(Block block, int size, int count, OreFeatureConfig.Target target) {
+        for (Biome biome : Registry.BIOME) {
+            // add ore
+            if (biome.getCategory() == Biome.Category.NETHER) {
+                biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
+                        Feature.ORE.configure(new OreFeatureConfig(target, block.getDefaultState(), size))
+                                .createDecoratedFeature(Decorator.MAGMA.configure(new CountDecoratorConfig(count))));
+            }
+        }
     }
 }
