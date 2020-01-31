@@ -1,18 +1,24 @@
 package co.origamigames.sheet;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.biomes.v1.FabricBiomes;
+import net.fabricmc.fabric.api.biomes.v1.OverworldBiomes;
+import net.fabricmc.fabric.api.biomes.v1.OverworldClimate;
 import net.fabricmc.fabric.api.block.FabricBlockSettings;
-import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.tools.FabricToolTags;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PillarBlock;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.*;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.tag.Tag;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -52,9 +58,9 @@ public class SheetLib implements ModInitializer {
         return block;
     }
     // add stripping functionality for a pair of blocks (ONLY WORKS FOR BLOCKS WITH AN AXIS BLOCKSTATE)
-    public static void addStrippingFunctionality(Block blockToBeStripped, Block blockAfterStrip) {
+    public static void addStrippingFunctionality(Block blockToBeStripped, Block blockAfterStrip, int itemDamageAmount, Tag<Item> usableItemsTag) {
         UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
-            if (player.getStackInHand(hand).getItem().isIn(FabricToolTags.AXES) && world.getBlockState(hit.getBlockPos()).getBlock() == blockToBeStripped) {
+            if (player.getStackInHand(hand).getItem().isIn(usableItemsTag) && world.getBlockState(hit.getBlockPos()).getBlock() == blockToBeStripped) {
                 BlockPos blockPos = hit.getBlockPos();
                 BlockState blockState = world.getBlockState(blockPos);
 
@@ -63,7 +69,7 @@ public class SheetLib implements ModInitializer {
                     world.setBlockState(blockPos, (BlockState)blockAfterStrip.getDefaultState().with(PillarBlock.AXIS, blockState.get(PillarBlock.AXIS)), 11);
                     if (!player.isCreative()) {
                         ItemStack stack = player.getStackInHand(hand);
-                        stack.damage(1, player, ((p) -> {
+                        stack.damage(itemDamageAmount, player, ((p) -> {
                             p.sendToolBreakStatus(hand);
                         }));
                     }
@@ -74,6 +80,20 @@ public class SheetLib implements ModInitializer {
 
             return ActionResult.PASS;
         });
+    }
+    public static void addStrippingFunctionality(Block blockToBeStripped, Block blockAfterStrip, int itemDamageCount) {
+        addStrippingFunctionality(blockToBeStripped, blockAfterStrip, itemDamageCount, FabricToolTags.AXES);
+    }
+    public static void addStrippingFunctionality(Block blockToBeStripped, Block blockAfterStrip) {
+        addStrippingFunctionality(blockToBeStripped, blockAfterStrip, 1);
+    }
+    // add block transparency
+    public static void setTransparencyRenderLayer(Block block) {
+        BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getCutout());
+    }
+    // add blocks to fuel registry
+    public static void addBlockToFuelRegistry(Block block, int burnTime) {
+        FuelRegistry.INSTANCE.add(block, burnTime);
     }
 
     // undefined item
@@ -105,11 +125,6 @@ public class SheetLib implements ModInitializer {
         });
     }
 
-    // item group template
-    public static ItemGroup itemGroup(String mod_id, String id, ItemStack item_stack) {
-        return FabricItemGroupBuilder.build(new Identifier(mod_id, id), () -> item_stack);
-    }
-
     // world gen
         // default overworld ore addition
     public static void addOverworldOre(Block block, int size, int count, int bottomOffset, int topOffset, int maxPerChunk) {
@@ -134,5 +149,11 @@ public class SheetLib implements ModInitializer {
                                 .createDecoratedFeature(Decorator.MAGMA.configure(new CountDecoratorConfig(count))));
             }
         }
+    }
+        // add overworld biome
+    public static Biome overworldBiome(String mod_id, String id, Biome biome, OverworldClimate climate, double weight) {
+        OverworldBiomes.addContinentalBiome(biome, climate, weight / 2);
+        FabricBiomes.addSpawnBiome(biome);
+        return Registry.register(Registry.BIOME, new Identifier(mod_id, id), biome);
     }
 }
