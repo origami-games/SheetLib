@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.tools.FabricToolTags;
 import net.minecraft.block.Block;
@@ -95,6 +96,12 @@ public class SheetLib implements ModInitializer {
     public static void addBlockToFuelRegistry(Block block, int burnTime) {
         FuelRegistry.INSTANCE.add(block, burnTime);
     }
+    public static void addToFlammableBlockRegistry(Block block, int burnChance, int spreadChance) {
+        FlammableBlockRegistry.getDefaultInstance().add(block, burnChance, spreadChance);
+    }
+    public static void addToFlammableBlockRegistry(Tag<Block> blockTag, int burnChance, int spreadChance) {
+        FlammableBlockRegistry.getDefaultInstance().add(blockTag, burnChance, spreadChance);
+    }
 
     // undefined item
     public static Item item(String mod_id, String id, Item item) {
@@ -126,23 +133,38 @@ public class SheetLib implements ModInitializer {
     }
 
     // world gen
-        // default overworld ore addition
-    public static void addOverworldOre(Block block, int size, int count, int bottomOffset, int topOffset, int maxPerChunk) {
+        // default ore addition
+    public static void addOverworldOre(Block block, int size, int count, int bottomOffset, int topOffset, int maxPerChunk, OreFeatureConfig.Target target) {
         for (Biome biome : Registry.BIOME) {
-            // add ore
             if (biome.getCategory() != Biome.Category.NETHER && biome.getCategory() != Biome.Category.THEEND) {
                 biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
                         Feature.ORE
-                                .configure(new OreFeatureConfig(OreFeatureConfig.Target.NATURAL_STONE, block.getDefaultState(), size))
+                                .configure(new OreFeatureConfig(target, block.getDefaultState(), size))
                                 .createDecoratedFeature(Decorator.COUNT_RANGE
                                         .configure(new RangeDecoratorConfig(count, bottomOffset, topOffset, maxPerChunk))));
             }
         }
     }
+    public static void addOverworldOre(Block block, int size, int count, int bottomOffset, int topOffset, int maxPerChunk) {
+        addOverworldOre(block, size, count, bottomOffset, topOffset, maxPerChunk, OreFeatureConfig.Target.NATURAL_STONE);
+    }
+    public static void addNetherOre(Block block, int size, int count, int bottomOffset, int topOffset, int maxPerChunk, OreFeatureConfig.Target target) {
+        for (Biome biome : Registry.BIOME) {
+            if (biome.getCategory() == Biome.Category.NETHER) {
+                biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
+                        Feature.ORE
+                                .configure(new OreFeatureConfig(target, block.getDefaultState(), size))
+                                .createDecoratedFeature(Decorator.COUNT_RANGE
+                                        .configure(new RangeDecoratorConfig(count, bottomOffset, topOffset, maxPerChunk))));
+            }
+        }
+    }
+    public static void addNetherOre(Block block, int size, int count, int bottomOffset, int topOffset, int maxPerChunk) {
+        addNetherOre(block, size, count, bottomOffset, topOffset, maxPerChunk, OreFeatureConfig.Target.NETHERRACK);
+    }
         // magma-like spawning conditions
     public static void addToMagmaDecorator(Block block, int size, int count, OreFeatureConfig.Target target) {
         for (Biome biome : Registry.BIOME) {
-            // add ore
             if (biome.getCategory() == Biome.Category.NETHER) {
                 biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
                         Feature.ORE.configure(new OreFeatureConfig(target, block.getDefaultState(), size))
