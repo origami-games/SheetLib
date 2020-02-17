@@ -40,10 +40,10 @@ public class SheetLib implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        LOGGER.info("[Sheet-Lib] Loaded");
+        LOGGER.info("[SheetLib] Loaded");
     }
 
-    // undefined block
+    // blocks
     public static Block block(String mod_id, String id, Block block, ItemGroup item_group) {
         Registry.register(Registry.BLOCK, new Identifier(mod_id, id), block);
         Registry.register(Registry.ITEM, new Identifier(mod_id, id),
@@ -51,7 +51,6 @@ public class SheetLib implements ModInitializer {
 
         return block;
     }
-    // block with the properties of another
     public static Block copiedBlock(String mod_id, String id, Block copied_block, ItemGroup item_group) {
         Block block = new Block(FabricBlockSettings.copy(copied_block).build());
         block(mod_id, id, block, item_group);
@@ -93,7 +92,7 @@ public class SheetLib implements ModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getCutout());
     }
     // add blocks to fuel registry
-    public static void addBlockToFuelRegistry(Block block, int burnTime) {
+    public static void addToFuelRegistry(Block block, int burnTime) {
         FuelRegistry.INSTANCE.add(block, burnTime);
     }
     public static void addToFlammableBlockRegistry(Block block, int burnChance, int spreadChance) {
@@ -103,31 +102,27 @@ public class SheetLib implements ModInitializer {
         FlammableBlockRegistry.getDefaultInstance().add(blockTag, burnChance, spreadChance);
     }
 
-    // undefined item
+    // items
     public static Item item(String mod_id, String id, Item item) {
         return Registry.register(Registry.ITEM, new Identifier(mod_id, id), item);
     }
-    // basic item
     public static Item item(String mod_id, String id, ItemGroup item_group, int max_count) {
         return item(mod_id, id, new Item(new Item.Settings().group(item_group).maxCount(max_count)));
     }
-    // spawn egg item
     @SuppressWarnings("rawtypes")
-    public static Item spawnEggItem(String mod_id, String entity_id, ItemGroup item_group, int max_count, int maxCount, EntityType entity, int primaryColor,
-                                    int secondaryColor) {
+    public static Item spawnEggItem(String mod_id, String entity_id, ItemGroup item_group, int max_count, EntityType entity, int primaryColor, int secondaryColor) {
         return Registry.register(Registry.ITEM, new Identifier(mod_id, entity_id + "_spawn_egg"),
                 new SpawnEggItem(entity, primaryColor, secondaryColor,
                         new Item.Settings().maxCount(max_count).group(item_group)));
     }
 
-    // loot table addition
     public static void lootTableAddition(String mod_id, String loot_table) {
         Identifier VANILLA_TABLE = new Identifier("minecraft", loot_table);
         Identifier ADDITION_TABLE = new Identifier(mod_id, "additions/" + loot_table);
 
         LootTableLoadingCallback.EVENT.register((resourceManager, lootManager, id, supplier, setter) -> {
             if (VANILLA_TABLE.equals(id)) {
-                supplier.copyFrom(lootManager.getSupplier(ADDITION_TABLE));
+                supplier.copyFrom(lootManager.getTable(ADDITION_TABLE));
             }
         });
     }
