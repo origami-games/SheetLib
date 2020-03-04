@@ -32,15 +32,14 @@ import net.minecraft.world.gen.decorator.RangeDecoratorConfig;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.OreFeatureConfig;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
+@SuppressWarnings("unused")
 public class SheetLib implements ModInitializer {
     public static final String MOD_ID = "sheet-lib";
-    public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     @Override
     public void onInitialize() {
-        LOGGER.info("[SheetLib] Loaded");
+        LogManager.getLogger(MOD_ID).info("[SheetLib] Loaded");
     }
 
     // blocks
@@ -66,12 +65,10 @@ public class SheetLib implements ModInitializer {
 
                 world.playSound(player, blockPos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
                 if (!world.isClient) {
-                    world.setBlockState(blockPos, (BlockState)blockAfterStrip.getDefaultState().with(PillarBlock.AXIS, blockState.get(PillarBlock.AXIS)), 11);
+                    world.setBlockState(blockPos, blockAfterStrip.getDefaultState().with(PillarBlock.AXIS, blockState.get(PillarBlock.AXIS)), 11);
                     if (!player.isCreative()) {
                         ItemStack stack = player.getStackInHand(hand);
-                        stack.damage(itemDamageAmount, player, ((p) -> {
-                            p.sendToolBreakStatus(hand);
-                        }));
+                        stack.damage(itemDamageAmount, player, ((p) -> p.sendToolBreakStatus(hand)));
                     }
                 }
 
