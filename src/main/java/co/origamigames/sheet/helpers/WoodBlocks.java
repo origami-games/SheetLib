@@ -83,7 +83,7 @@ public class WoodBlocks {
         blocks.pressurePlate = register(name + "_pressure_plate", mod_id, new TerraformPressurePlateBlock(PressurePlateBlock.ActivationRule.EVERYTHING, FabricBlockSettings.copy(Blocks.OAK_PRESSURE_PLATE).materialColor(woodInfo.plankColor).build()));
         blocks.trapdoor = register(name + "_trapdoor", mod_id, new TerraformTrapdoorBlock(FabricBlockSettings.copy(Blocks.OAK_TRAPDOOR).materialColor(woodInfo.plankColor).build()));
 
-        Identifier signTexture = new Identifier(mod_id, "textures/entity/signs/" + name + ".png");
+        Identifier signTexture = new Identifier(mod_id, "entity/signs/" + name);
         blocks.sign = register(name + "_sign", mod_id, new TerraformSignBlock(signTexture, FabricBlockSettings.copy(Blocks.OAK_SIGN).materialColor(woodInfo.plankColor).build()));
         blocks.wallSign = register(name + "_wall_sign", mod_id, new TerraformWallSignBlock(signTexture, FabricBlockSettings.copy(Blocks.OAK_WALL_SIGN).materialColor(woodInfo.plankColor).build()));
 
