@@ -35,9 +35,7 @@ public class WoodItems {
         String name = woodInfo.name;
 
         items.log = registerBlockItem(name + "_log", blocks.log, item_group, mod_id);
-        if (woodInfo.hasLeaves) {
-            items.leaves = registerBlockItem(name + "_leaves", blocks.leaves, item_group, mod_id);
-        }
+        if (woodInfo.hasLeaves) items.leaves = registerBlockItem(name + "_leaves", blocks.leaves, item_group, mod_id);
         items.planks = registerBlockItem(name + "_planks", blocks.planks, item_group, mod_id);
         items.slab = registerBlockItem(name + "_slab", blocks.slab, item_group, mod_id);
         items.stairs = registerBlockItem(name + "_stairs", blocks.stairs, item_group, mod_id);
@@ -49,7 +47,8 @@ public class WoodItems {
         items.trapdoor = registerBlockItem(name + "_trapdoor", blocks.trapdoor, item_group, mod_id);
         items.sign = registerSignItem(name + "_sign", blocks.sign, blocks.wallSign, item_group, mod_id);
         items.strippedLog = registerBlockItem("stripped_" + name + "_log", blocks.strippedLog, item_group, mod_id);
-        items.boat = registerBoatItem(name + "_boat", boatType, item_group, mod_id);
+        if (boatType != null) items.boat = registerBoatItem(name + "_boat", boatType, item_group, mod_id);
+            else items.boat = null;
 
         if (blocks.log != blocks.wood) {
             items.wood = registerBlockItem(name + "_wood", blocks.wood, item_group, mod_id);
