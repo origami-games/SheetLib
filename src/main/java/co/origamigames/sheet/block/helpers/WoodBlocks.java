@@ -1,19 +1,15 @@
-package co.origamigames.sheet.helpers;
+package co.origamigames.sheet.block.helpers;
 
-import co.origamigames.sheet.block.*;
+import co.origamigames.sheet.SheetLibRegistryHelper;
 import com.terraformersmc.terraform.block.*;
-import com.terraformersmc.terraform.entity.TerraformBoatEntity;
 import net.fabricmc.fabric.api.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.minecraft.block.*;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
-
-import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
 public class WoodBlocks {
@@ -33,44 +29,36 @@ public class WoodBlocks {
     public TerraformTrapdoorBlock trapdoor;
     public Block strippedLog;
     public Block strippedWood;
-    private String name;
     private WoodInfo woodInfo;
 
     FlammableBlockRegistry flammableBlockRegistry = FlammableBlockRegistry.getDefaultInstance();
 
     public WoodBlocks() {}
 
-    public static WoodBlocks register(String name, String mod_id, ItemGroup item_group, WoodInfo woodInfo, Supplier<EntityType<TerraformBoatEntity>> boatType, boolean isFlammable, boolean useExtendedLeaves) {
-        WoodBlocks blocks = registerCrafted(name, mod_id, item_group, woodInfo, isFlammable);
+    public static WoodBlocks register(String mod_id, String name, ItemGroup item_group, WoodInfo woodInfo) {
+        WoodBlocks blocks = registerCrafted(mod_id, name, item_group, woodInfo);
 
         blocks.log = register(name + "_log", mod_id, new StrippableLogBlock(() -> blocks.strippedLog, woodInfo.plankColor, FabricBlockSettings.copy(Blocks.OAK_LOG).materialColor(woodInfo.barkColor).build()));
         blocks.wood = register(name + "_wood", mod_id, new StrippableLogBlock(() -> blocks.strippedWood, woodInfo.barkColor, FabricBlockSettings.copy(Blocks.OAK_LOG).materialColor(woodInfo.barkColor).build()));
-        if (woodInfo.hasLeaves) {
-            if (useExtendedLeaves) {
-                blocks.leaves = register(name + "_leaves", mod_id, new ExtendedLeavesBlock(FabricBlockSettings.copy(Blocks.OAK_LEAVES).materialColor(woodInfo.leafColor).build()));
-            } else {
-                blocks.leaves = register(name + "_leaves", mod_id, new LeavesBlock(FabricBlockSettings.copy(Blocks.OAK_LEAVES).materialColor(woodInfo.leafColor).build()));
-            }
-        } else {
-//            useExtendedLeaves = false;
-            blocks.leaves = null;
-        }
+
+         if (woodInfo.hasLeaves) {
+            if (woodInfo.getUsesExtendedLeaves()) blocks.leaves = register(name + "_leaves", mod_id, new ExtendedLeavesBlock(FabricBlockSettings.copy(Blocks.OAK_LEAVES).materialColor(woodInfo.leafColor).build()));
+                else blocks.leaves = register(name + "_leaves", mod_id, new LeavesBlock(FabricBlockSettings.copy(Blocks.OAK_LEAVES).materialColor(woodInfo.leafColor).build()));
+        } else blocks.leaves = null;
+
         blocks.strippedLog = register("stripped_" + name + "_log", mod_id, new LogBlock(woodInfo.plankColor, FabricBlockSettings.copy(Blocks.OAK_LOG).materialColor(woodInfo.plankColor).build()));
         blocks.strippedWood = register("stripped_" + name + "_wood", mod_id, new LogBlock(woodInfo.plankColor, FabricBlockSettings.copy(Blocks.OAK_LOG).materialColor(woodInfo.plankColor).build()));
 
-        if (isFlammable) blocks.addTreeFireInfo();
+        if (woodInfo.isFlammable) blocks.addToFireRegistries();
 
-        WoodItems.register(woodInfo, blocks, boatType, mod_id, item_group);
+        woodInfo.blocks = blocks;
+        WoodItems.register(mod_id, item_group, woodInfo);
 
         return blocks;
     }
-    public static WoodBlocks register(String name, String mod_id, ItemGroup item_group, WoodInfo woodInfo, Supplier<EntityType<TerraformBoatEntity>> boatType, boolean isFlammable) {
-        return register(name, mod_id, item_group, woodInfo, boatType, isFlammable, true);
-    }
 
-    public static WoodBlocks registerCrafted(String name, String mod_id, ItemGroup item_group, WoodInfo woodInfo, boolean isFlammable) {
+    public static WoodBlocks registerCrafted(String mod_id, String name, ItemGroup item_group, WoodInfo woodInfo) {
         WoodBlocks blocks = new WoodBlocks();
-        blocks.name = name;
         blocks.woodInfo = woodInfo;
 
         blocks.planks = register(name + "_planks", mod_id, new Block(FabricBlockSettings.copy(Blocks.OAK_PLANKS).materialColor(woodInfo.plankColor).build()));
@@ -87,8 +75,8 @@ public class WoodBlocks {
         blocks.sign = register(name + "_sign", mod_id, new TerraformSignBlock(signTexture, FabricBlockSettings.copy(Blocks.OAK_SIGN).materialColor(woodInfo.plankColor).build()));
         blocks.wallSign = register(name + "_wall_sign", mod_id, new TerraformWallSignBlock(signTexture, FabricBlockSettings.copy(Blocks.OAK_WALL_SIGN).materialColor(woodInfo.plankColor).build()));
 
-        if (isFlammable) {
-            blocks.addCraftedFireInfo();
+        if (woodInfo.isFlammable) {
+            blocks.addCraftedToFireRegistries();
 
             FuelRegistry.INSTANCE.add(blocks.fence, 300);
             FuelRegistry.INSTANCE.add(blocks.fenceGate, 300);
@@ -100,7 +88,7 @@ public class WoodBlocks {
         return blocks;
     }
 
-    public void addTreeFireInfo() {
+    public void addToFireRegistries() {
         flammableBlockRegistry.add(log, 5, 5);
         flammableBlockRegistry.add(strippedLog, 5, 5);
 
@@ -115,30 +103,15 @@ public class WoodBlocks {
         flammableBlockRegistry.add(leaves, 30, 60);
     }
 
-    public void addCraftedFireInfo() {
+    public void addCraftedToFireRegistries() {
         flammableBlockRegistry.add(planks, 5, 20);
         flammableBlockRegistry.add(slab, 5, 20);
         flammableBlockRegistry.add(stairs, 5, 20);
         flammableBlockRegistry.add(fence, 5, 20);
         flammableBlockRegistry.add(fenceGate, 5, 20);
     }
-
-    public enum LogSize {
-        LARGE("large"),
-        SMALL("small");
-
-        private final String name;
-
-        LogSize(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-    }
     
     private static <T extends Block> T register(String name, String mod_id, T block) {
-        return Registry.register(name, mod_id, block);
+        return SheetLibRegistryHelper.register(name, mod_id, block);
     }
 }
