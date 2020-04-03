@@ -9,10 +9,10 @@ public class BlockWithDecorInfo {
     public boolean isPlural;
     public boolean isFlammable = true;
 
-    public Block baseBlock = new Block(FabricBlockSettings.copy(Blocks.AIR).build());
-    public SlabBlock slabBlock = new SlabBlock(FabricBlockSettings.copy(baseBlock).build());
-    public TerraformStairsBlock stairsBlock = new TerraformStairsBlock(baseBlock, FabricBlockSettings.copy(baseBlock).build());
-    public WallBlock wallBlock = new WallBlock(FabricBlockSettings.copy(baseBlock).build());
+    public Block baseBlock = null;
+    public SlabBlock slabBlock = null;
+    public TerraformStairsBlock stairsBlock = null;
+    public WallBlock wallBlock = null;
 
     public int getFuelTime() {
         if (isFlammable) return 300;
