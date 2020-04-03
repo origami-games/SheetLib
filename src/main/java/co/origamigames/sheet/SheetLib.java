@@ -37,17 +37,6 @@ import java.util.logging.Logger;
 public class SheetLib implements ModInitializer {
     public static final String MOD_ID = "sheet-lib";
     public static final Logger LOGGER = Logger.getLogger(SheetLib.MOD_ID);
-    public static final ColorBlocks CREAM_BLOCKS = new ColorBlocks(SheetLib.Info.CREAM);
-
-    public static class Info {
-        public static ColorBlocks.Info CREAM;
-
-        static {
-            CREAM = new ColorBlocks.Info();
-            CREAM.mod_id = MOD_ID;
-            CREAM.color = "cream";
-        }
-    }
 
     @Override
     public void onInitialize() {
