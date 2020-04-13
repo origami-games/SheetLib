@@ -11,54 +11,95 @@ import java.util.logging.Logger;
 
 @SuppressWarnings("unused")
 public class BlockWithDecor {
+    private Logger LOGGER = SheetLib.LOGGER;
+
+    public String mod_id;
+
+    public String block_id;
+    public ItemGroup item_group;
+
+    public boolean isPlural;
+    public boolean isFlammable;
+    public int fuelTime;
+
     public Block base;
     public SlabBlock slab;
     public TerraformStairsBlock stairs;
     public WallBlock wall;
-    public BlockWithDecorInfo info;
-    FlammableBlockRegistry flammableBlockRegistry = FlammableBlockRegistry.getDefaultInstance();
 
-    public BlockWithDecor() {}
+    public BlockWithDecor(BlockWithDecor.Info info) {
+        this.mod_id = info.mod_id;
 
-    public static BlockWithDecor register(String mod_id, ItemGroup item_group, BlockWithDecorInfo blockWithDecorInfo) {
-        BlockWithDecor blocks = new BlockWithDecor();
+        this.block_id = info.block_id;
+        this.item_group = info.item_group;
 
-        blocks.info = blockWithDecorInfo;
-        Block baseBlock = blockWithDecorInfo.baseBlock;
-        SlabBlock slabBlock = blockWithDecorInfo.slabBlock;
-        TerraformStairsBlock stairsBlock = blockWithDecorInfo.stairsBlock;
-        WallBlock wallBlock = blockWithDecorInfo.wallBlock;
-
-        String name = blockWithDecorInfo.name;
-        if (baseBlock != null) {
-            if (blockWithDecorInfo.isPlural) blocks.base = register(mod_id, name + "s", item_group, baseBlock);
-                else blocks.base = register(mod_id, name, item_group, baseBlock);
-        } else Logger.getLogger(SheetLib.MOD_ID).warning("[" + SheetLib.MOD_ID + "] BlockWithDecor '" + mod_id + ":" + name + "' has no base!");
-        if (slabBlock != null) blocks.slab = (SlabBlock)register(mod_id, name + "_slab", item_group, slabBlock);
-           else blocks.slab = null;
-        if (stairsBlock != null) blocks.stairs = (TerraformStairsBlock)register(mod_id, name + "_stairs", item_group, stairsBlock);
-            else blocks.stairs = null;
-        if (wallBlock != null) blocks.wall = (WallBlock) register(mod_id, name + "_wall", item_group, wallBlock);
-            else blocks.wall = null;
-
-        if (blockWithDecorInfo.isFlammable) {
-            blocks.addToFireRegistries(blockWithDecorInfo.getFuelTime());
+        if (this.block_id.equals("")) {
+            SheetLib.LOGGER.severe(SheetLib.log("No id is defined for " + info + " in mod " + this.mod_id + "!"));
+            return;
         }
 
-        return blocks;
+        this.isPlural = info.isPlural;
+        this.isFlammable = info.isFlammable;
+        this.fuelTime = info.fuelTime;
+        this.base = info.base;
+        this.slab = info.slab;
+        this.stairs = info.stairs;
+        this.wall = info.wall;
+
+        if (this.block_id.equals("")) {
+            LOGGER.severe(SheetLib.log("No id is defined for " + info + " in mod " + this.mod_id + "!"));
+            return;
+        }
+
+        // base
+        if (base != null) {
+            if (this.isPlural) this.base = register(this.block_id + "s", base);
+            else this.base = register(this.block_id, base);
+        } else LOGGER.warning(SheetLib.log("BlockWithDecor '" + this.mod_id + ":" + this.block_id + "' has no base!"));
+        // slab
+        if (slab != null) this.slab = (SlabBlock)register(this.block_id + "_slab", slab);
+        else this.slab = null;
+        // stairs
+        if (stairs != null) this.stairs = (TerraformStairsBlock)register(this.block_id + "_stairs", stairs);
+        else this.stairs = null;
+        // wall
+        if (wall != null) this.wall = (WallBlock)register(this.block_id + "_wall", wall);
+        else this.wall = null;
+
+        if (this.isFlammable) {
+            FlammableBlockRegistry flammableBlockRegistry = FlammableBlockRegistry.getDefaultInstance();
+            flammableBlockRegistry.add(this.base, 5, 20);
+            flammableBlockRegistry.add(this.slab, 5, 20);
+            flammableBlockRegistry.add(this.stairs, 5, 20);
+
+            FuelRegistry fuelRegistry = FuelRegistry.INSTANCE;
+            fuelRegistry.add(this.base, this.fuelTime);
+            fuelRegistry.add(this.slab, this.fuelTime / 2);
+            fuelRegistry.add(this.stairs, this.fuelTime);
+        }
     }
 
-    private void addToFireRegistries(int fuelTime) {
-        this.flammableBlockRegistry.add(this.base, 5, 20);
-        this.flammableBlockRegistry.add(this.slab, 5, 20);
-        this.flammableBlockRegistry.add(this.stairs, 5, 20);
-
-        FuelRegistry.INSTANCE.add(this.base, fuelTime);
-        FuelRegistry.INSTANCE.add(this.slab, fuelTime / 2);
-        FuelRegistry.INSTANCE.add(this.stairs, fuelTime);
+    private Block register(String id, Block block) {
+        return SheetLib.block(this.mod_id, id, this.item_group, block);
     }
 
-    private static Block register(String mod_id, String name, ItemGroup item_group, Block block) {
-        return SheetLib.block(mod_id, name, block, item_group);
+    public static class Info {
+        public Info() {
+            if (isFlammable) fuelTime = 300;
+                else fuelTime = 0;
+        }
+
+        public String mod_id = "";
+        public String block_id = "";
+        public ItemGroup item_group = null;
+
+        public boolean isPlural = false;
+        public boolean isFlammable = true;
+        public int fuelTime;
+
+        public Block base = null;
+        public SlabBlock slab = null;
+        public TerraformStairsBlock stairs = null;
+        public WallBlock wall = null;
     }
 }

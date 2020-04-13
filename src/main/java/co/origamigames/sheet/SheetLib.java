@@ -11,9 +11,7 @@ import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.tools.FabricToolTags;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.PillarBlock;
+import net.minecraft.block.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.*;
@@ -31,28 +29,37 @@ import net.minecraft.world.gen.decorator.Decorator;
 import net.minecraft.world.gen.decorator.RangeDecoratorConfig;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.OreFeatureConfig;
-import org.apache.logging.log4j.LogManager;
+
+import java.util.logging.Logger;
 
 @SuppressWarnings("unused")
 public class SheetLib implements ModInitializer {
     public static final String MOD_ID = "sheet-lib";
+    public static final Logger LOGGER = Logger.getLogger(SheetLib.MOD_ID);
 
     @Override
     public void onInitialize() {
-        LogManager.getLogger(MOD_ID).info("[SheetLib] Loaded");
+        LOGGER.info(log("Loaded"));
+    }
+
+    public static String log(String text) {
+        return "[SheetLib] " + text;
+    }
+    public static Identifier texture(String mod_id, String path) {
+        return new Identifier(mod_id, "textures/" + path + ".png");
     }
 
     // blocks
-    public static Block block(String mod_id, String id, Block block, ItemGroup item_group) {
+    public static Block block(String mod_id, String id, ItemGroup item_group, Block block) {
         Registry.register(Registry.BLOCK, new Identifier(mod_id, id), block);
         Registry.register(Registry.ITEM, new Identifier(mod_id, id),
                 new BlockItem(block, new Item.Settings().group(item_group)));
 
         return block;
     }
-    public static Block copiedBlock(String mod_id, String id, Block copied_block, ItemGroup item_group) {
+    public static Block copiedBlock(String mod_id, String id, ItemGroup item_group, Block copied_block) {
         Block block = new Block(FabricBlockSettings.copy(copied_block).build());
-        block(mod_id, id, block, item_group);
+        block(mod_id, id, item_group, block);
 
         return block;
     }
@@ -107,7 +114,7 @@ public class SheetLib implements ModInitializer {
         return item(mod_id, id, new Item(new Item.Settings().group(item_group).maxCount(max_count)));
     }
     @SuppressWarnings("rawtypes")
-    public static Item spawnEggItem(String mod_id, String entity_id, ItemGroup item_group, int max_count, EntityType entity, int primaryColor, int secondaryColor) {
+    public static Item spawnEggItem(String mod_id, String entity_id, EntityType entity, ItemGroup item_group, int max_count, int primaryColor, int secondaryColor) {
         return Registry.register(Registry.ITEM, new Identifier(mod_id, entity_id + "_spawn_egg"),
                 new SpawnEggItem(entity, primaryColor, secondaryColor,
                         new Item.Settings().maxCount(max_count).group(item_group)));
@@ -125,7 +132,7 @@ public class SheetLib implements ModInitializer {
     }
 
     // world gen
-        // default ore addition
+    // default ore addition
     public static void addOverworldOre(Block block, int size, int count, int bottomOffset, int topOffset, int maxPerChunk, OreFeatureConfig.Target target) {
         for (Biome biome : Registry.BIOME) {
             if (biome.getCategory() != Biome.Category.NETHER && biome.getCategory() != Biome.Category.THEEND) {
@@ -154,7 +161,7 @@ public class SheetLib implements ModInitializer {
     public static void addNetherOre(Block block, int size, int count, int bottomOffset, int topOffset, int maxPerChunk) {
         addNetherOre(block, size, count, bottomOffset, topOffset, maxPerChunk, OreFeatureConfig.Target.NETHERRACK);
     }
-        // magma-like spawning conditions
+    // magma-like spawning conditions
     public static void addToMagmaDecorator(Block block, int size, int count, OreFeatureConfig.Target target) {
         for (Biome biome : Registry.BIOME) {
             if (biome.getCategory() == Biome.Category.NETHER) {
@@ -164,7 +171,7 @@ public class SheetLib implements ModInitializer {
             }
         }
     }
-        // add overworld biome
+    // add overworld biome
     public static Biome overworldBiome(String mod_id, String id, Biome biome, OverworldClimate climate, double weight) {
         OverworldBiomes.addContinentalBiome(biome, climate, weight / 2);
         FabricBiomes.addSpawnBiome(biome);
