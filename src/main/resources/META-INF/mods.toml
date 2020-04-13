@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[31,)"
+issueTrackerURL="https://github.com/origami-games/SheetLib"
+
+[[mods]]
+modId="sheet-lib"
+version="${file.jarVersion}"
+displayName="SheetLib"
+#updateJSONURL="https://[insert]"
+displayURL="https://curseforge.com/minecraft/mc-mods/SheetLib"
+logoFile="pack.png"
+authors="Origami Games"
+description="A library for commonly used stuff"
+
+[[dependencies.sheet-lib]]
+    modId="forge"
+    mandatory=true
+    versionRange="[31,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.sheet-lib]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.15.2]"
+    ordering="NONE"
+    side="BOTH"

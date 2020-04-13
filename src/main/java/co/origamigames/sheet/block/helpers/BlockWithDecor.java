@@ -1,17 +1,13 @@
 package co.origamigames.sheet.block.helpers;
 
 import co.origamigames.sheet.SheetLib;
-import com.terraformersmc.terraform.block.*;
-import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
+import co.origamigames.sheet.block.*;
 import net.minecraft.block.*;
 import net.minecraft.item.ItemGroup;
-
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("unused")
 public class BlockWithDecor {
-    private Logger LOGGER = SheetLib.LOGGER;
 
     public String mod_id;
 
@@ -24,7 +20,7 @@ public class BlockWithDecor {
 
     public Block base;
     public SlabBlock slab;
-    public TerraformStairsBlock stairs;
+    public PublicStairsBlock stairs;
     public WallBlock wall;
 
     public BlockWithDecor(BlockWithDecor.Info info) {
@@ -34,7 +30,7 @@ public class BlockWithDecor {
         this.item_group = info.item_group;
 
         if (this.block_id.equals("")) {
-            SheetLib.LOGGER.severe(SheetLib.log("No id is defined for " + info + " in mod " + this.mod_id + "!"));
+            SheetLib.LOGGER.error(SheetLib.log("No id is defined for " + info + " in mod " + this.mod_id + "!"));
             return;
         }
 
@@ -47,7 +43,7 @@ public class BlockWithDecor {
         this.wall = info.wall;
 
         if (this.block_id.equals("")) {
-            LOGGER.severe(SheetLib.log("No id is defined for " + info + " in mod " + this.mod_id + "!"));
+            SheetLib.LOGGER.error(SheetLib.log("No id is defined for " + info + " in mod " + this.mod_id + "!"));
             return;
         }
 
@@ -55,27 +51,27 @@ public class BlockWithDecor {
         if (base != null) {
             if (this.isPlural) this.base = register(this.block_id + "s", base);
             else this.base = register(this.block_id, base);
-        } else LOGGER.warning(SheetLib.log("BlockWithDecor '" + this.mod_id + ":" + this.block_id + "' has no base!"));
+        } else SheetLib.LOGGER.warning(SheetLib.log("BlockWithDecor '" + this.mod_id + ":" + this.block_id + "' has no base!"));
         // slab
         if (slab != null) this.slab = (SlabBlock)register(this.block_id + "_slab", slab);
         else this.slab = null;
         // stairs
-        if (stairs != null) this.stairs = (TerraformStairsBlock)register(this.block_id + "_stairs", stairs);
+        if (stairs != null) this.stairs = (PublicStairsBlock)register(this.block_id + "_stairs", stairs);
         else this.stairs = null;
         // wall
         if (wall != null) this.wall = (WallBlock)register(this.block_id + "_wall", wall);
         else this.wall = null;
 
         if (this.isFlammable) {
-            FlammableBlockRegistry flammableBlockRegistry = FlammableBlockRegistry.getDefaultInstance();
-            flammableBlockRegistry.add(this.base, 5, 20);
-            flammableBlockRegistry.add(this.slab, 5, 20);
-            flammableBlockRegistry.add(this.stairs, 5, 20);
+            FireBlock flammableBlockRegistry = (FireBlock)Blocks.FIRE;
+            flammableBlockRegistry.setFireInfo(this.base, 5, 20);
+            flammableBlockRegistry.setFireInfo(this.slab, 5, 20);
+            flammableBlockRegistry.setFireInfo(this.stairs, 5, 20);
 
-            FuelRegistry fuelRegistry = FuelRegistry.INSTANCE;
-            fuelRegistry.add(this.base, this.fuelTime);
-            fuelRegistry.add(this.slab, this.fuelTime / 2);
-            fuelRegistry.add(this.stairs, this.fuelTime);
+//            FuelRegistry fuelRegistry = FuelRegistry.INSTANCE;
+//            fuelRegistry.add(this.base, this.fuelTime);
+//            fuelRegistry.add(this.slab, this.fuelTime / 2);
+//            fuelRegistry.add(this.stairs, this.fuelTime);
         }
     }
 
@@ -86,7 +82,7 @@ public class BlockWithDecor {
     public static class Info {
         public Info() {
             if (isFlammable) fuelTime = 300;
-                else fuelTime = 0;
+            else fuelTime = 0;
         }
 
         public String mod_id = "";
@@ -99,7 +95,7 @@ public class BlockWithDecor {
 
         public Block base = null;
         public SlabBlock slab = null;
-        public TerraformStairsBlock stairs = null;
+        public PublicStairsBlock stairs = null;
         public WallBlock wall = null;
     }
 }
